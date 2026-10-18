@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="lo">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ລະບົບຂາຍໜ້າຮ້ານ - ຄອມມືສອງ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark">PC</span>
+    <div>
+      <strong>ຄອມມືສອງ POS</strong>
+      <small id="todayLabel"></small>
+    </div>
+  </div>
+  <nav class="tabs">
+    <button class="tab active" data-view="posView">ຂາຍ</button>
+    <button class="tab" data-view="productsView">ສິນຄ້າ</button>
+    <button class="tab" data-view="reportsView">ລາຍງານ</button>
+  </nav>
+</header>
+
+<main>
+  <!-- ===== ຂາຍ ===== -->
+  <section id="posView" class="view active">
+    <div class="pos-layout">
+      <div class="pos-left">
+        <input id="posSearch" class="input big" placeholder="ຄົ້ນຫາ ຊື່ / SKU / Serial ...">
+        <div id="posList" class="product-grid"></div>
+      </div>
+
+      <aside class="pos-right">
+        <h2>ກະຕ່າສິນຄ້າ</h2>
+        <div id="cartList" class="cart-list"></div>
+
+        <div class="cart-form">
+          <div class="row">
+            <input id="custName" class="input" placeholder="ຊື່ລູກຄ້າ (ບໍ່ບັງຄັບ)">
+            <input id="custPhone" class="input" placeholder="ເບີໂທ">
+          </div>
+          <div class="row">
+            <label>ສ່ວນຫຼຸດ (₭)
+              <input id="discount" type="number" min="0" value="0" class="input">
+            </label>
+            <label>ຊຳລະດ້ວຍ
+              <select id="payMethod" class="input">
+                <option value="cash">ເງິນສົດ</option>
+                <option value="transfer">ໂອນ</option>
+                <option value="card">ບັດ</option>
+              </select>
+            </label>
+          </div>
+          <label id="receivedWrap">ຮັບເງິນມາ (₭)
+            <input id="received" type="number" min="0" class="input">
+          </label>
+        </div>
+
+        <dl class="totals">
+          <div><dt>ລວມ</dt><dd id="tSub">0 ₭</dd></div>
+          <div><dt>ສ່ວນຫຼຸດ</dt><dd id="tDisc">0 ₭</dd></div>
+          <div class="grand"><dt>ຍອດຊຳລະ</dt><dd id="tTotal">0 ₭</dd></div>
+          <div><dt>ເງິນທອນ</dt><dd id="tChange">0 ₭</dd></div>
+        </dl>
+
+        <div class="row">
+          <button id="btnClear" class="btn ghost">ລ້າງກະຕ່າ</button>
+          <button id="btnCheckout" class="btn primary">ຢືນຢັນຂາຍ</button>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ===== ສິນຄ້າ ===== -->
+  <section id="productsView" class="view">
+    <div class="toolbar">
+      <input id="prodSearch" class="input" placeholder="ຄົ້ນຫາສິນຄ້າ ...">
+      <button id="btnAddProduct" class="btn primary">+ ເພີ່ມສິນຄ້າ</button>
+    </div>
+    <div class="table-wrap">
+      <table id="prodTable">
+        <thead>
+          <tr>
+            <th>SKU</th><th>ຊື່ / ສະເປັກ</th><th>ໝວດ</th><th>ເກຣດ</th>
+            <th>ຕົ້ນທຶນ</th><th>ລາຄາຂາຍ</th><th>ຄົງເຫຼືອ</th><th>ຮັບປະກັນ</th><th></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ===== ລາຍງານ ===== -->
+  <section id="reportsView" class="view">
+    <div class="toolbar">
+      <label>ຈາກ <input type="date" id="rFrom" class="input"></label>
+      <label>ເຖິງ <input type="date" id="rTo" class="input"></label>
+      <button id="btnExport" class="btn ghost">ດາວໂຫຼດ CSV</button>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><span>ຈຳນວນບິນ</span><strong id="sCount">0</strong></div>
+      <div class="stat"><span>ຍອດຂາຍ</span><strong id="sRevenue">0 ₭</strong></div>
+      <div class="stat"><span>ຕົ້ນທຶນ</span><strong id="sCost">0 ₭</strong></div>
+      <div class="stat good"><span>ກຳໄລ</span><strong id="sProfit">0 ₭</strong></div>
+    </div>
+
+    <h3>ປະຫວັດການຂາຍ</h3>
+    <div class="table-wrap">
+      <table id="salesTable">
+        <thead><tr><th>ເລກບິນ</th><th>ວັນທີ</th><th>ລູກຄ້າ</th><th>ຊຳລະ</th><th>ຍອດ</th><th>ກຳໄລ</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <h3>ສິນຄ້າໃກ້ໝົດ</h3>
+    <div class="table-wrap">
+      <table id="lowTable">
+        <thead><tr><th>SKU</th><th>ຊື່</th><th>ຄົງເຫຼືອ</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<!-- ຟອມສິນຄ້າ -->
+<dialog id="productDialog">
+  <form id="productForm" method="dialog">
+    <h2 id="productDialogTitle">ເພີ່ມສິນຄ້າ</h2>
+    <input type="hidden" id="pId">
+    <div class="grid2">
+      <label>SKU <input id="pSku" class="input" required></label>
+      <label>ໝວດ
+        <select id="pCat" class="input">
+          <option>Laptop</option><option>Desktop</option><option>Monitor</option>
+          <option>Parts</option><option>Accessory</option><option>Other</option>
+        </select>
+      </label>
+    </div>
+    <label>ຊື່ສິນຄ້າ <input id="pName" class="input" required></label>
+    <label>ສະເປັກ (CPU / RAM / SSD ...) <input id="pSpecs" class="input"></label>
+    <div class="grid2">
+      <label>Serial Number <input id="pSerial" class="input"></label>
+      <label>ເກຣດສະພາບ
+        <select id="pGrade" class="input">
+          <option value="A">A - ສະພາບດີຫຼາຍ</option>
+          <option value="B">B - ສະພາບດີ</option>
+          <option value="C">C - ມີຮອຍ</option>
+        </select>
+      </label>
+    </div>
+    <div class="grid3">
+      <label>ຕົ້ນທຶນ (₭) <input id="pCost" type="number" min="0" class="input" required></label>
+      <label>ລາຄາຂາຍ (₭) <input id="pPrice" type="number" min="0" class="input" required></label>
+      <label>ຈຳນວນ <input id="pStock" type="number" min="0" class="input" required></label>
+    </div>
+    <label>ຮັບປະກັນ (ວັນ) <input id="pWarranty" type="number" min="0" value="30" class="input"></label>
+    <div class="row end">
+      <button type="button" id="btnCancelProduct" class="btn ghost">ຍົກເລີກ</button>
+      <button type="submit" class="btn primary">ບັນທຶກ</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- ໃບເສັດ -->
+<dialog id="receiptDialog">
+  <div id="receiptBody"></div>
+  <div class="row end no-print">
+    <button id="btnCloseReceipt" class="btn ghost">ປິດ</button>
+    <button id="btnPrint" class="btn primary">ພິມໃບເສັດ</button>
+  </div>
+</dialog>
+
+<div id="toast" class="toast"></div>
+
+<script>
+/* ===== utils ===== */
+const Utils = {
+  $: (s, root = document) => root.querySelector(s),
+  $$: (s, root = document) => [...root.querySelectorAll(s)],
+  money(n) { return new Intl.NumberFormat('en-US').format(Math.round(n || 0)) + ' ₭'; },
+  esc(s) {
+    return String(s ?? '').replace(/[&<>"']/g, c =>
+      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  },
+  uid(prefix = 'id') { return prefix + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); },
+  dateKey(d = new Date()) {
+    const x = new Date(d);
+    const m = String(x.getMonth() + 1).padStart(2, '0');
+    const day = String(x.getDate()).padStart(2, '0');
+    return `${x.getFullYear()}-${m}-${day}`;
+  },
+  dateTime(d) {
+    const x = new Date(d);
+    const p = n => String(n).padStart(2, '0');
+    return `${p(x.getDate())}/${p(x.getMonth() + 1)}/${x.getFullYear()} ${p(x.getHours())}:${p(x.getMinutes())}`;
+  },
+  toast(msg) {
+    const t = Utils.$('#toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(Utils._tt);
+    Utils._tt = setTimeout(() => t.classList.remove('show'), 2200);
+  },
+  payLabel: { cash: 'ເງິນສົດ', transfer: 'ໂອນ', card: 'ບັດ' }
+};
+
+/* ===== storage (localStorage) ===== */
+const DB = {
+  KEY: 'pos_secondhand_v1',
+  data: null,
+  load() {
+    try { this.data = JSON.parse(localStorage.getItem(this.KEY)); } catch (e) { this.data = null; }
+    if (!this.data) {
+      this.data = { products: [], sales: [], counter: 0 };
+      this.seed();
+      this.save();
+    }
+  },
+  save() {
+    try { localStorage.setItem(this.KEY, JSON.stringify(this.data)); }
+    catch (e) { Utils.toast('ບັນທຶກຂໍ້ມູນບໍ່ສຳເລັດ'); }
+  },
+  products() { return this.data.products; },
+  product(id) { return this.data.products.find(p => p.id === id); },
+  saveProduct(p) {
+    const i = this.data.products.findIndex(x => x.id === p.id);
+    if (i >= 0) this.data.products[i] = p; else this.data.products.push(p);
+    this.save();
+  },
+  deleteProduct(id) {
+    this.data.products = this.data.products.filter(p => p.id !== id);
+    this.save();
+  },
+  sales() { return this.data.sales; },
+  nextReceiptNo() {
+    this.data.counter += 1;
+    return 'INV' + String(this.data.counter).padStart(5, '0');
+  },
+  addSale(sale) { this.data.sales.unshift(sale); this.save(); },
+  seed() {
+    const mk = (sku, name, cat, specs, serial, grade, cost, price, stock, warranty) =>
+      ({ id: Utils.uid('p'), sku, name, category: cat, specs, serial, grade, cost, price, stock, warranty });
+    this.data.products.push(
+      mk('NB-001', 'Lenovo ThinkPad T480', 'Laptop', 'i5-8350U / 8GB / SSD 256GB', 'PF1AB123', 'A', 2200000, 3200000, 1, 90),
+      mk('NB-002', 'Dell Latitude 5490', 'Laptop', 'i5-8250U / 8GB / SSD 128GB', 'DL5490X1', 'B', 1900000, 2700000, 1, 60),
+      mk('DT-001', 'HP EliteDesk 800 G3 SFF', 'Desktop', 'i5-6500 / 8GB / SSD 240GB', 'HPED8003', 'B', 1500000, 2300000, 3, 60),
+      mk('MN-001', 'Dell 22" P2219H', 'Monitor', 'IPS FHD', 'CN-P2219-77', 'A', 450000, 800000, 4, 30),
+      mk('PT-001', 'RAM DDR4 8GB (ຖອດເຄື່ອງ)', 'Parts', '2666MHz', '', 'A', 120000, 220000, 10, 30)
+    );
+  }
+};
+
+/* ===== products ===== */
+const Products = {
+  init() {
+    Utils.$('#prodSearch').addEventListener('input', () => this.render());
+    Utils.$('#btnAddProduct').addEventListener('click', () => this.openForm());
+    Utils.$('#btnCancelProduct').addEventListener('click', () => Utils.$('#productDialog').close());
+    Utils.$('#productForm').addEventListener('submit', e => { e.preventDefault(); this.submit(); });
+    Utils.$('#prodTable tbody').addEventListener('click', e => {
+      const btn = e.target.closest('button[data-act]');
+      if (!btn) return;
+      const id = btn.dataset.id;
+      if (btn.dataset.act === 'edit') this.openForm(id);
+      if (btn.dataset.act === 'del') this.remove(id);
+    });
+    this.render();
+  },
+  match(p, q) {
+    if (!q) return true;
+    q = q.toLowerCase();
+    return [p.sku, p.name, p.specs, p.serial, p.category].some(v => String(v || '').toLowerCase().includes(q));
+  },
+  render() {
+    const q = Utils.$('#prodSearch').value.trim();
+    const rows = DB.products().filter(p => this.match(p, q));
+    const tb = Utils.$('#prodTable tbody');
+    if (!rows.length) {
+      tb.innerHTML = `<tr><td colspan="9" class="empty">ບໍ່ພົບສິນຄ້າ. ກົດ "+ ເພີ່ມສິນຄ້າ" ເພື່ອເລີ່ມ.</td></tr>`;
+      return;
+    }
+    tb.innerHTML = rows.map(p => `
+      <tr>
+        <td>${Utils.esc(p.sku)}</td>
+        <td>${Utils.esc(p.name)}<div class="sub">${Utils.esc(p.specs)}${p.serial ? ' · SN: ' + Utils.esc(p.serial) : ''}</div></td>
+        <td>${Utils.esc(p.category)}</td>
+        <td><span class="grade ${p.grade}">${p.grade}</span></td>
+        <td class="num">${Utils.money(p.cost)}</td>
+        <td class="num">${Utils.money(p.price)}</td>
+        <td class="${p.stock <= 1 ? 'low' : ''}">${p.stock}</td>
+        <td>${p.warranty} ວັນ</td>
+        <td>
+          <button class="btn sm" data-act="edit" data-id="${p.id}">ແກ້ໄຂ</button>
+          <button class="btn sm danger" data-act="del" data-id="${p.id}">ລຶບ</button>
+        </td>
+      </tr>`).join('');
+  },
+  openForm(id) {
+    const p = id ? DB.product(id) : null;
+    Utils.$('#productDialogTitle').textContent = p ? 'ແກ້ໄຂສິນຄ້າ' : 'ເພີ່ມສິນຄ້າ';
+    const set = (k, v) => Utils.$('#' + k).value = v;
+    set('pId', p?.id || '');
+    set('pSku', p?.sku || '');
+    set('pName', p?.name || '');
+    set('pCat', p?.category || 'Laptop');
+    set('pSpecs', p?.specs || '');
+    set('pSerial', p?.serial || '');
+    set('pGrade', p?.grade || 'B');
+    set('pCost', p?.cost ?? '');
+    set('pPrice', p?.price ?? '');
+    set('pStock', p?.stock ?? 1);
+    set('pWarranty', p?.warranty ?? 30);
+    Utils.$('#productDialog').showModal();
+  },
+  submit() {
+    const v = k => Utils.$('#' + k).value.trim();
+    const id = v('pId') || Utils.uid('p');
+    const sku = v('pSku');
+    if (DB.products().some(p => p.sku === sku && p.id !== id)) { Utils.toast('SKU ນີ້ມີແລ້ວ'); return; }
+    DB.saveProduct({
+      id, sku,
+      name: v('pName'), category: v('pCat'), specs: v('pSpecs'), serial: v('pSerial'), grade: v('pGrade'),
+      cost: Number(v('pCost')) || 0, price: Number(v('pPrice')) || 0,
+      stock: Number(v('pStock')) || 0, warranty: Number(v('pWarranty')) || 0
+    });
+    Utils.$('#productDialog').close();
+    Utils.toast('ບັນທຶກສິນຄ້າແລ້ວ');
+    this.render();
+    POS.renderList();
+  },
+  remove(id) {
+    const p = DB.product(id);
+    if (!p || !confirm(`ລຶບ "${p.name}" ?`)) return;
+    DB.deleteProduct(id);
+    POS.removeFromCart(id);
+    this.render();
+    POS.renderList();
+    Utils.toast('ລຶບແລ້ວ');
+  }
+};
+
+/* ===== receipt ===== */
+const Receipt = {
+  SHOP: { name: 'ຮ້ານຄອມມືສອງ', addr: 'ທີ່ຢູ່ຮ້ານ ...', tel: 'ໂທ: 020 xxxx xxxx' },
+  init() {
+    Utils.$('#btnCloseReceipt').addEventListener('click', () => Utils.$('#receiptDialog').close());
+    Utils.$('#btnPrint').addEventListener('click', () => window.print());
+  },
+  html(s) {
+    const items = s.items.map(i => `
+      <div class="it">
+        <div class="ln"><span>${Utils.esc(i.name)}</span><span>${Utils.money(i.price * i.qty)}</span></div>
+        <small>${i.qty} × ${Utils.money(i.price)}${i.serial ? ' · SN: ' + Utils.esc(i.serial) : ''} · ຮັບປະກັນ ${i.warranty} ວັນ</small>
+      </div>`).join('');
+    return `
+      <div class="receipt">
+        <h3>${Utils.esc(this.SHOP.name)}</h3>
+        <div class="c">${Utils.esc(this.SHOP.addr)}<br>${Utils.esc(this.SHOP.tel)}</div>
+        <hr>
+        <div class="ln"><span>ເລກບິນ</span><span>${s.no}</span></div>
+        <div class="ln"><span>ວັນທີ</span><span>${Utils.dateTime(s.date)}</span></div>
+        ${s.customer ? `<div class="ln"><span>ລູກຄ້າ</span><span>${Utils.esc(s.customer)}${s.phone ? ' (' + Utils.esc(s.phone) + ')' : ''}</span></div>` : ''}
+        <hr>
+        ${items}
+        <hr>
+        <div class="ln"><span>ລວມ</span><span>${Utils.money(s.subtotal)}</span></div>
+        <div class="ln"><span>ສ່ວນຫຼຸດ</span><span>- ${Utils.money(s.discount)}</span></div>
+        <div class="ln tot"><span>ຍອດຊຳລະ</span><span>${Utils.money(s.total)}</span></div>
+        <div class="ln"><span>ຊຳລະດ້ວຍ</span><span>${Utils.payLabel[s.method]}</span></div>
+        ${s.method === 'cash' ? `
+          <div class="ln"><span>ຮັບເງິນ</span><span>${Utils.money(s.received)}</span></div>
+          <div class="ln"><span>ເງິນທອນ</span><span>${Utils.money(s.change)}</span></div>` : ''}
+        <hr>
+        <div class="c">ຂອບໃຈທີ່ໃຊ້ບໍລິການ<br>ເກັບບິນນີ້ໄວ້ເພື່ອຮັບປະກັນສິນຄ້າ</div>
+      </div>`;
+  },
+  show(sale) {
+    Utils.$('#receiptBody').innerHTML = this.html(sale);
+    Utils.$('#receiptDialog').showModal();
+  }
+};
+
+/* ===== POS ===== */
+const POS = {
+  cart: [],
+  init() {
+    Utils.$('#posSearch').addEventListener('input', () => this.renderList());
+    Utils.$('#posList').addEventListener('click', e => {
+      const c = e.target.closest('.pcard');
+      if (c && !c.disabled) this.add(c.dataset.id);
+    });
+    Utils.$('#cartList').addEventListener('click', e => {
+      const b = e.target.closest('button[data-act]');
+      if (!b) return;
+      const id = b.dataset.id;
+      if (b.dataset.act === 'inc') this.add(id);
+      if (b.dataset.act === 'dec') this.dec(id);
+      if (b.dataset.act === 'rm') this.removeFromCart(id);
+    });
+    ['discount', 'received'].forEach(id => Utils.$('#' + id).addEventListener('input', () => this.renderTotals()));
+    Utils.$('#payMethod').addEventListener('change', () => this.renderTotals());
+    Utils.$('#btnClear').addEventListener('click', () => this.clear());
+    Utils.$('#btnCheckout').addEventListener('click', () => this.checkout());
+    this.renderList();
+    this.renderCart();
+  },
+  renderList() {
+    const q = Utils.$('#posSearch').value.trim();
+    const list = DB.products().filter(p => Products.match(p, q));
+    const box = Utils.$('#posList');
+    if (!list.length) { box.innerHTML = `<div class="empty">ບໍ່ພົບສິນຄ້າ</div>`; return; }
+    box.innerHTML = list.map(p => {
+      const inCart = this.cart.find(c => c.id === p.id)?.qty || 0;
+      const left = p.stock - inCart;
+      return `
+        <button class="pcard" data-id="${p.id}" ${left <= 0 ? 'disabled' : ''}>
+          <span class="name">${Utils.esc(p.name)}</span>
+          <span class="specs">${Utils.esc(p.specs)}</span>
+          <span class="price">${Utils.money(p.price)}</span>
+          <span class="meta"><span>${Utils.esc(p.sku)} <span class="grade ${p.grade}">${p.grade}</span></span><span>${left > 0 ? 'ເຫຼືອ ' + left : 'ໝົດ'}</span></span>
+        </button>`;
+    }).join('');
+  },
+  add(id) {
+    const p = DB.product(id);
+    if (!p) return;
+    const line = this.cart.find(c => c.id === id);
+    const qty = line ? line.qty : 0;
+    if (qty >= p.stock) { Utils.toast('ສິນຄ້າໃນສະຕັອກບໍ່ພໍ'); return; }
+    if (line) line.qty++; else this.cart.push({ id, qty: 1 });
+    this.refresh();
+  },
+  dec(id) {
+    const line = this.cart.find(c => c.id === id);
+    if (!line) return;
+    line.qty--;
+    if (line.qty <= 0) this.removeFromCart(id); else this.refresh();
+  },
+  removeFromCart(id) { this.cart = this.cart.filter(c => c.id !== id); this.refresh(); },
+  clear() {
+    this.cart = [];
+    ['custName', 'custPhone', 'received'].forEach(id => Utils.$('#' + id).value = '');
+    Utils.$('#discount').value = 0;
+    this.refresh();
+  },
+  refresh() { this.renderList(); this.renderCart(); },
+  lines() { return this.cart.map(c => ({ p: DB.product(c.id), qty: c.qty })).filter(l => l.p); },
+  calc() {
+    const subtotal = this.lines().reduce((s, l) => s + l.p.price * l.qty, 0);
+    const discount = Math.min(Math.max(Number(Utils.$('#discount').value) || 0, 0), subtotal);
+    const total = subtotal - discount;
+    const received = Number(Utils.$('#received').value) || 0;
+    const method = Utils.$('#payMethod').value;
+    const change = method === 'cash' ? Math.max(received - total, 0) : 0;
+    return { subtotal, discount, total, received, method, change };
+  },
+  renderCart() {
+    const box = Utils.$('#cartList');
+    const lines = this.lines();
+    box.innerHTML = lines.length ? lines.map(l => `
+      <div class="cart-item">
+        <div>
+          <div class="n">${Utils.esc(l.p.name)}</div>
+          <div class="s">${Utils.money(l.p.price)}${l.p.serial ? ' · SN: ' + Utils.esc(l.p.serial) : ''}</div>
+        </div>
+        <div class="qty">
+          <button data-act="dec" data-id="${l.p.id}" aria-label="ຫຼຸດ">−</button>
+          <span>${l.qty}</span>
+          <button data-act="inc" data-id="${l.p.id}" aria-label="ເພີ່ມ">+</button>
+          <button data-act="rm" data-id="${l.p.id}" aria-label="ລຶບ">✕</button>
+        </div>
+      </div>`).join('') : `<div class="empty">ຍັງບໍ່ມີສິນຄ້າ. ກົດເລືອກສິນຄ້າດ້ານຊ້າຍ.</div>`;
+    this.renderTotals();
+  },
+  renderTotals() {
+    const t = this.calc();
+    Utils.$('#tSub').textContent = Utils.money(t.subtotal);
+    Utils.$('#tDisc').textContent = '- ' + Utils.money(t.discount);
+    Utils.$('#tTotal').textContent = Utils.money(t.total);
+    Utils.$('#tChange').textContent = Utils.money(t.change);
+    Utils.$('#receivedWrap').style.display = t.method === 'cash' ? '' : 'none';
+  },
+  checkout() {
+    const lines = this.lines();
+    if (!lines.length) { Utils.toast('ກະຕ່າວ່າງ'); return; }
+    const t = this.calc();
+    if (t.method === 'cash' && t.received < t.total) { Utils.toast('ຮັບເງິນມາບໍ່ພໍ'); return; }
+    for (const l of lines) {
+      if (l.qty > l.p.stock) { Utils.toast(`${l.p.name}: ສະຕັອກບໍ່ພໍ`); return; }
+    }
+    const sale = {
+      no: DB.nextReceiptNo(),
+      date: new Date().toISOString(),
+      customer: Utils.$('#custName').value.trim(),
+      phone: Utils.$('#custPhone').value.trim(),
+      items: lines.map(l => ({
+        id: l.p.id, sku: l.p.sku, name: l.p.name, serial: l.p.serial,
+        qty: l.qty, price: l.p.price, cost: l.p.cost, warranty: l.p.warranty
+      })),
+      subtotal: t.subtotal, discount: t.discount, total: t.total,
+      method: t.method,
+      received: t.method === 'cash' ? t.received : t.total,
+      change: t.change
+    };
+    sale.profit = sale.total - sale.items.reduce((s, i) => s + i.cost * i.qty, 0);
+    lines.forEach(l => { l.p.stock -= l.qty; });
+    DB.addSale(sale);
+    this.clear();
+    Products.render();
+    Reports.render();
+    Receipt.show(sale);
+    Utils.toast('ຂາຍສຳເລັດ ' + sale.no);
+  }
+};
+
+/* ===== reports ===== */
+const Reports = {
+  init() {
+    const today = Utils.dateKey();
+    Utils.$('#rFrom').value = today;
+    Utils.$('#rTo').value = today;
+    ['rFrom', 'rTo'].forEach(id => Utils.$('#' + id).addEventListener('change', () => this.render()));
+    Utils.$('#btnExport').addEventListener('click', () => this.exportCsv());
+    Utils.$('#salesTable tbody').addEventListener('click', e => {
+      const b = e.target.closest('button[data-no]');
+      if (!b) return;
+      const s = DB.sales().find(x => x.no === b.dataset.no);
+      if (s) Receipt.show(s);
+    });
+    this.render();
+  },
+  filtered() {
+    const from = Utils.$('#rFrom').value || '0000-00-00';
+    const to = Utils.$('#rTo').value || '9999-12-31';
+    return DB.sales().filter(s => { const k = Utils.dateKey(s.date); return k >= from && k <= to; });
+  },
+  render() {
+    const sales = this.filtered();
+    const revenue = sales.reduce((s, x) => s + x.total, 0);
+    const profit = sales.reduce((s, x) => s + x.profit, 0);
+    Utils.$('#sCount').textContent = sales.length;
+    Utils.$('#sRevenue').textContent = Utils.money(revenue);
+    Utils.$('#sCost').textContent = Utils.money(revenue - profit);
+    Utils.$('#sProfit').textContent = Utils.money(profit);
+    Utils.$('#salesTable tbody').innerHTML = sales.length ? sales.map(s => `
+      <tr>
+        <td>${s.no}</td>
+        <td>${Utils.dateTime(s.date)}</td>
+        <td>${Utils.esc(s.customer) || '-'}</td>
+        <td>${Utils.payLabel[s.method]}</td>
+        <td>${Utils.money(s.total)}</td>
+        <td>${Utils.money(s.profit)}</td>
+        <td><button class="btn sm" data-no="${s.no}">ເບິ່ງບິນ</button></td>
+      </tr>`).join('') : `<tr><td colspan="7" class="empty">ບໍ່ມີການຂາຍໃນຊ່ວງນີ້</td></tr>`;
+    const low = DB.products().filter(p => p.stock <= 1).sort((a, b) => a.stock - b.stock);
+    Utils.$('#lowTable tbody').innerHTML = low.length ? low.map(p => `
+      <tr><td>${Utils.esc(p.sku)}</td><td>${Utils.esc(p.name)}</td><td class="low">${p.stock}</td></tr>`).join('')
+      : `<tr><td colspan="3" class="empty">ສະຕັອກຍັງພໍ</td></tr>`;
+  },
+  exportCsv() {
+    const rows = [['ເລກບິນ', 'ວັນທີ', 'ລູກຄ້າ', 'ຊຳລະ', 'ຍອດລວມ', 'ສ່ວນຫຼຸດ', 'ຍອດຊຳລະ', 'ກຳໄລ', 'ລາຍການ']];
+    this.filtered().forEach(s => rows.push([
+      s.no, Utils.dateTime(s.date), s.customer, Utils.payLabel[s.method],
+      s.subtotal, s.discount, s.total, s.profit,
+      s.items.map(i => `${i.name} x${i.qty}`).join('; ')
+    ]));
+    const csv = rows.map(r => r.map(c => `"${String(c ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `sales_${Utils.dateKey()}.csv`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+};
+
+/* ===== app ===== */
+const App = {
+  init() {
+    DB.load();
+    Utils.$('#todayLabel').textContent = Utils.dateTime(new Date()).slice(0, 10);
+    Utils.$$('.tab').forEach(t => t.addEventListener('click', () => this.show(t.dataset.view)));
+    Products.init();
+    Receipt.init();
+    POS.init();
+    Reports.init();
+  },
+  show(viewId) {
+    Utils.$$('.view').forEach(v => v.classList.toggle('active', v.id === viewId));
+    Utils.$$('.tab').forEach(t => t.classList.toggle('active', t.dataset.view === viewId));
+    if (viewId === 'reportsView') Reports.render();
+    if (viewId === 'posView') POS.renderList();
+  }
+};
+document.addEventListener('DOMContentLoaded', () => App.init());
+</script>
+</body>
+</html>

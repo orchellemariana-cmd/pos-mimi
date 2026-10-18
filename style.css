@@ -1,0 +1,107 @@
+:root{
+  --bg:#eef1f0; --panel:#ffffff; --ink:#1a2b30; --muted:#6a7b80;
+  --line:#d8dfdd; --accent:#0e7c66; --accent-ink:#ffffff;
+  --warn:#b4540a; --danger:#b3261e;
+  --r:10px;
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#121a1c; --panel:#1b2629; --ink:#e6eeee; --muted:#93a5a8; --line:#2c3a3d; --accent:#2fb596; --accent-ink:#06211b;}
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans Lao","Phetsarath OT",system-ui,sans-serif;font-size:15px;line-height:1.5}
+h2,h3{margin:0 0 10px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+.brand{display:flex;align-items:center;gap:10px}
+.brand small{display:block;color:var(--muted);font-size:12px}
+.brand-mark{display:grid;place-items:center;width:38px;height:38px;border-radius:8px;background:var(--accent);color:var(--accent-ink);font-weight:700;letter-spacing:.5px}
+.tabs{display:flex;gap:6px}
+.tab{border:1px solid var(--line);background:transparent;color:var(--ink);padding:8px 18px;border-radius:8px;font:inherit;cursor:pointer}
+.tab.active{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+main{padding:16px;max-width:1300px;margin:0 auto}
+.view{display:none}.view.active{display:block}
+
+.input{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);font:inherit}
+.input.big{padding:12px 14px;font-size:16px;margin-bottom:12px}
+.input:focus,.btn:focus-visible,.tab:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+label{display:block;font-size:13px;color:var(--muted)}
+label .input,label.block .input{margin-top:4px;color:var(--ink)}
+.btn{padding:10px 16px;border-radius:8px;border:1px solid var(--line);font:inherit;cursor:pointer;background:var(--panel);color:var(--ink)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+.btn.ghost:hover{background:var(--bg)}
+.btn.sm{padding:4px 10px;font-size:13px}
+.btn.danger{color:var(--danger)}
+.row{display:flex;gap:10px;align-items:flex-end}
+.row>*{flex:1}
+.row.end{justify-content:flex-end;margin-top:14px}
+.row.end>*{flex:0 0 auto}
+
+.pos-layout{display:grid;grid-template-columns:1fr 380px;gap:16px;align-items:start}
+.product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.pcard{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px;text-align:left;cursor:pointer;font:inherit;color:var(--ink);display:flex;flex-direction:column;gap:4px}
+.pcard:hover{border-color:var(--accent)}
+.pcard:disabled{opacity:.45;cursor:not-allowed}
+.pcard .name{font-weight:600}
+.pcard .specs{font-size:12px;color:var(--muted);min-height:36px}
+.pcard .price{font-weight:700;color:var(--accent)}
+.pcard .meta{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+.grade{display:inline-block;min-width:22px;text-align:center;border-radius:5px;padding:0 6px;font-weight:700;font-size:12px;border:1px solid currentColor}
+.grade.A{color:var(--accent)}.grade.B{color:var(--warn)}.grade.C{color:var(--danger)}
+
+.pos-right{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;position:sticky;top:76px}
+.cart-list{max-height:260px;overflow:auto;margin-bottom:10px}
+.cart-item{display:grid;grid-template-columns:1fr auto;gap:2px 8px;padding:8px 0;border-bottom:1px solid var(--line)}
+.cart-item .n{font-weight:600}
+.cart-item .s{font-size:12px;color:var(--muted)}
+.qty{display:flex;align-items:center;gap:6px}
+.qty button{width:26px;height:26px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.empty{color:var(--muted);padding:20px 0;text-align:center}
+.cart-form{display:grid;gap:8px;margin-bottom:10px}
+.totals{margin:0 0 12px}
+.totals div{display:flex;justify-content:space-between;padding:3px 0}
+.totals dt,.totals dd{margin:0}
+.totals .grand{font-size:20px;font-weight:700;border-top:1px solid var(--line);margin-top:4px;padding-top:8px}
+
+.toolbar{display:flex;gap:10px;align-items:flex-end;margin-bottom:12px;flex-wrap:wrap}
+.toolbar .input{min-width:160px}
+.table-wrap{overflow-x:auto;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);margin-bottom:20px}
+table{width:100%;border-collapse:collapse;min-width:640px}
+th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:13px;color:var(--muted);font-weight:600;background:var(--bg)}
+td.num,th.num{text-align:right}
+td .sub{font-size:12px;color:var(--muted)}
+.low{color:var(--danger);font-weight:700}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:18px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px}
+.stat span{display:block;color:var(--muted);font-size:13px}
+.stat strong{font-size:22px}
+.stat.good strong{color:var(--accent)}
+
+dialog{border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--ink);padding:18px;width:min(560px,94vw)}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+dialog form{display:grid;gap:10px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+
+.receipt{font-family:"Noto Sans Lao",monospace;font-size:13px}
+.receipt h3{text-align:center;margin:0}
+.receipt .c{text-align:center;color:var(--muted)}
+.receipt hr{border:0;border-top:1px dashed var(--muted);margin:8px 0}
+.receipt .ln{display:flex;justify-content:space-between;gap:8px}
+.receipt .it{margin-bottom:6px}
+.receipt .it small{display:block;color:var(--muted)}
+.receipt .tot{font-weight:700;font-size:15px}
+
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:8px;opacity:0;pointer-events:none;transition:.2s;z-index:50}
+.toast.show{opacity:1;transform:translateX(-50%)}
+
+@media (max-width:900px){
+  .pos-layout{grid-template-columns:1fr}
+  .pos-right{position:static}
+}
+@media print{
+  body *{visibility:hidden}
+  #receiptBody,#receiptBody *{visibility:visible}
+  #receiptBody{position:absolute;left:0;top:0;width:80mm}
+  .no-print{display:none}
+}
